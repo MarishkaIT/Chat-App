@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Application</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<div>
+    <input type="text" id="username" placeholder="Enter your name" />
+    <button onclick="connect()">Join</button>
+</div>
+<div>
+    <input type="text" id="message" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+<ul id="messages"></ul>
+
+<script>
+    var stompClient = null;
+    var username = null;
+
+    function connect() {
+        username = document.getElementById('username').value.trim();
+        if (username) {
+            var socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                document.getElementById('message').disabled = false;
+                document.querySelector('button[onclick="sendMessage()"]').disabled = false;
+
+                stompClient.subscribe('/topic/public', function (message) {
+                    showMessage(JSON.parse(message.body));
+                });
+
+                stompClient.send("/app/addUser ", {}, username);
+            });
+        }
+    }
+
+    function sendMessage() {
+        var messageContent = document.getElementById('message').value;
+        stompClient.send("/app/sendMessage", {}, JSON.stringify({'content': messageContent, 'sender': username, 'type': 'CHAT'}));
+        document.getElementById('message').value = '';
+    }
+
+    function showMessage(message) {
+        var messageArea = document.getElementById('messages');
+        var messageElement = document.createElement('li');
+        messageElement.textContent = message.sender + ': ' + message.content;
+        messageArea.appendChild(messageElement);
+    }
+    window.addEventListener("beforeunload", function () {
+        if (stompClient) {
+            stompClient.send("/app/removeUser ", {}, JSON.stringify(username));
+            stompClient.disconnect();
+        }
+
+    });
+
+</script>
+</body>
+</html>
