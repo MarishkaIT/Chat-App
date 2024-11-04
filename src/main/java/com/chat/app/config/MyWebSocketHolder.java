@@ -21,9 +21,14 @@ public class MyWebSocketHolder extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("Message received: " + message.getPayload());
-        session.sendMessage(new TextMessage("Hello, " + message.getPayload()));
-        broadcast(message);
+        try{
+            System.out.println("Message received: " + message.getPayload());
+            session.sendMessage(new TextMessage("Hello, " + message.getPayload()));
+            broadcast(message);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
     }
 
     @Override

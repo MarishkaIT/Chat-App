@@ -6,7 +6,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
-@EnableWebSocket
+@EnableWebSocketMessageBroker
 public class WebSocketConfiguration implements WebSocketConfigurer {
 
     @Bean
@@ -20,8 +20,9 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
         registry.addHandler(myWebSocketHolder(), "/ws").setAllowedOrigins("*");
     }
 
+
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chat").setAllowedOrigins("*");
+        registry.addEndpoint("/chat").setAllowedOrigins("*").withSockJS();
     }
 
     public void configureMessageBroker(MessageBrokerRegistry registry) {

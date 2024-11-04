@@ -22,6 +22,10 @@
 
     function connect() {
         username = document.getElementById('username').value.trim();
+        if (!username) {
+            alert("Please enter a username");
+            return;
+        }
         if (username) {
             var socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
@@ -34,7 +38,7 @@
                     showMessage(JSON.parse(message.body));
                 });
 
-                stompClient.send("/app/addUser ", {}, username);
+                stompClient.send("/app/addUser", {}, username);
             });
         }
     }
@@ -53,7 +57,7 @@
     }
     window.addEventListener("beforeunload", function () {
         if (stompClient) {
-            stompClient.send("/app/removeUser ", {}, JSON.stringify(username));
+            stompClient.send("/app/removeUser", {}, JSON.stringify(username));
             stompClient.disconnect();
         }
 
